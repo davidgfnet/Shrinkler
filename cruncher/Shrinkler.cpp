@@ -29,6 +29,7 @@ void usage() {
 	printf(" -d, --data           Treat input as raw data, rather than executable\n");
 	printf(" -b, --bytes          Disable parity context - better on byte-oriented data\n");
 	printf(" -w, --header         Write data file header for easier loading\n");
+	printf(" -n, --endian-swap    Swap word endianess in the output file\n");
 	printf(" -h, --hunkmerge      Merge hunks of the same memory type\n");
 	printf(" -u, --no-crunch      Process hunks without crunching\n");
 	printf(" -o, --overlap        Overlap compressed and decompressed data to save memory\n");
@@ -205,6 +206,7 @@ int main2(int argc, const char *argv[]) {
 	FlagParameter   data          ("-d", "--data",                                 argc, argv, consumed);
 	FlagParameter   bytes         ("-b", "--bytes",                                argc, argv, consumed);
 	FlagParameter   header        ("-w", "--header",                               argc, argv, consumed);
+	FlagParameter   endian_swap   ("-n", "--endian-swap",                          argc, argv, consumed);
 	FlagParameter   hunkmerge     ("-h", "--hunkmerge",                            argc, argv, consumed);
 	FlagParameter   no_crunch     ("-u", "--no-crunch",                            argc, argv, consumed);
 	FlagParameter   overlap       ("-o", "--overlap",                              argc, argv, consumed);
@@ -328,7 +330,7 @@ int main2(int argc, const char *argv[]) {
 		printf("References discarded:%9d\n\n", edge_factory.max_cleaned_edges);
 
 		printf("Saving file %s...\n\n", outfile);
-		crunched->save(outfile, header.seen);
+		crunched->save(outfile, header.seen, endian_swap.seen);
 
 		printf("Final file size: %d\n\n", crunched->size(header.seen));
 		delete crunched;

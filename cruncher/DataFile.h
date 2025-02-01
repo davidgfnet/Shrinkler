@@ -114,16 +114,33 @@ public:
 		exit(1);
 	}
 
-	void save(const char *filename, bool write_header) {
+	void save(const char *filename, bool write_header, bool endian_swap) {
 		FILE *file;
 		if ((file = fopen(filename, "wb"))) {
 			bool ok = true;
 			if (write_header) {
 				ok = fwrite(&header, 1, sizeof(DataHeader), file) == sizeof(DataHeader);
 			}
-			if (ok && fwrite(&data[0], 1, data.size(), file) == data.size()) {
-				fclose(file);
-				return;
+			if (endian_swap) {
+				vector<unsigned char> tmp(data);
+				while (tmp.size() & 3)
+					tmp.push_back(0);
+				for (unsigned i = 0; i < tmp.size(); i+=4) {
+					unsigned char t = tmp[i+0], t2 = tmp[i+1];
+					tmp[i+0] = tmp[i+3];
+					tmp[i+3] = t;
+					tmp[i+1] = tmp[i+2];
+					tmp[i+2] = t2;
+				}
+				if (ok && fwrite(&tmp[0], 1, tmp.size(), file) == tmp.size()) {
+					fclose(file);
+					return;
+				}
+			} else {
+				if (ok && fwrite(&data[0], 1, data.size(), file) == data.size()) {
+					fclose(file);
+					return;
+				}
 			}
 		}
 
